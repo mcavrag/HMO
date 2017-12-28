@@ -165,7 +165,7 @@ public class TabuSearch {
 
 					startSolution.getTestExecList().add(tmpTest);
 				} else if ((tmpTest.getExecMachine() == null)) {
-					System.out.println("Usao");
+					//System.out.println("Usao");
 				}
 			}
 			machineTmpList.addAll(machines);
