@@ -49,13 +49,20 @@ public class TabuSearch {
 
 	private Solution findBestNeighbor(ArrayList<Solution> candidateNeighbors,
 			ArrayList<Solution> solutionsInTabu) {
-		// TODO Auto-generated method stub
-		return null;
+		Solution neighbour = candidateNeighbors.get(0);
+		
+		// The best neighbour is the one with the lowest execution time (eval function value)
+		for(Solution s : candidateNeighbors) {
+			if(neighbour.getExecTime() > s.getExecTime())
+				neighbour = s;
+		}
+		
+		return neighbour;
 	}
 
 	// 2-OPT swap
 	// TODO
-
+	// this needs testing
 	private ArrayList<Solution> generateNeighbours(Solution currentSolution) {
 		Utility helper = new Utility();
 		ArrayList<Solution> neighbours = new ArrayList<Solution>();
@@ -66,6 +73,10 @@ public class TabuSearch {
 
 		int i = 0;
 		while (i < numberOfNeighbours) {
+			Solution neighbour = new Solution();
+			neighbour.setTestExecList(tests);
+			neighbour.setUsedMachines(tmpListMachines);
+			
 			int randTest1 = ThreadLocalRandom.current()
 					.nextInt(0, tests.size());
 			int randTest2 = ThreadLocalRandom.current()
@@ -74,15 +85,22 @@ public class TabuSearch {
 			if (randTest1 != randTest2) {
 				Test test1 = tests.get(randTest1);
 				Test test2 = tests.get(randTest2);
+				
+				ArrayList<Resource> commonResources = test2.getReqResources();
+				commonResources.retainAll(test1.getReqResources());
 
 				if (test2.canAssignToMachine(test1.getExecMachine())
-						&& test1.canAssignToMachine(test2.getExecMachine())) {
-
-					/*
-					 * test2.setExecMachine(test1.getExecMachine());
-					 * machines.get(machines.indexOf()) i++;
-					 */
+						&& test1.canAssignToMachine(test2.getExecMachine()) && commonResources.isEmpty()) {
+					neighbour.setExecTime(0);
+				} else {
+					// solution is not feasible, so we set the execution time to infinity
+					neighbour.setExecTime(Integer.MAX_VALUE);
 				}
+				
+				// regardless of solution feasability, swap the tests
+				Machine m1 = test1.getExecMachine();
+				test1.setExecMachine(test2.getExecMachine());
+				test2.setExecMachine(m1);
 			}
 		}
 		return null;
