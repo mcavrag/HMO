@@ -33,15 +33,13 @@ public class TabuSearch {
 
 			// TODO
 
-			/*
-			 * Solution bestNeighbourFound =
-			 * findBestNeighbor(candidateNeighbours, solutionsInTabu); if
-			 * (bestNeighbourFound.getExecTime() < bestSolution.getExecTime()) {
-			 * bestSolution = bestNeighbourFound; }
-			 */
+			Solution bestNeighbourFound = findBestNeighbor(candidateNeighbours, solutionsInTabu);
+			if (bestNeighbourFound.getExecTime() < bestSolution.getExecTime()) {
+				bestSolution = bestNeighbourFound;
+			}
 
 			tabuList.add(currentSolution);
-			// currentSolution = bestNeighbourFound;
+			currentSolution = bestNeighbourFound;
 		}
 
 		return bestSolution;
@@ -91,19 +89,26 @@ public class TabuSearch {
 
 				if (test2.canAssignToMachine(test1.getExecMachine())
 						&& test1.canAssignToMachine(test2.getExecMachine()) && commonResources.isEmpty()) {
-					neighbour.setExecTime(0);
+
+					Machine m1 = test1.getExecMachine();
+					test1.setExecMachine(test2.getExecMachine());
+					test2.setExecMachine(m1);
+					
+					neighbour.setExecTime(calculateMaxExecTime(neighbour.getUsedMachines()));
 				} else {
+					// regardless of solution feasability, swap the tests
+					Machine m1 = test1.getExecMachine();
+					test1.setExecMachine(test2.getExecMachine());
+					test2.setExecMachine(m1);
+					
 					// solution is not feasible, so we set the execution time to infinity
 					neighbour.setExecTime(Integer.MAX_VALUE);
-				}
-				
-				// regardless of solution feasability, swap the tests
-				Machine m1 = test1.getExecMachine();
-				test1.setExecMachine(test2.getExecMachine());
-				test2.setExecMachine(m1);
+				}	
 			}
+			
+			neighbours.add(neighbour);
 		}
-		return null;
+		return neighbours;
 	}
 
 	public Solution generateStartSolution(ArrayList<Test> tests,
