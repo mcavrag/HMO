@@ -86,22 +86,42 @@ public class TabuSearch {
 				
 				ArrayList<Resource> commonResources = test2.getReqResources();
 				commonResources.retainAll(test1.getReqResources());
+				
+				Machine m1 = test1.getExecMachine();
+				Machine m2 = test2.getExecMachine();
+				
+				//regardless of solution feasibility, tests are swapped
+				test1.setExecMachine(m2);
+				test2.setExecMachine(m1);
+				
+				test1.setStartExec(tmpListMachines.get(
+						tmpListMachines.indexOf(m2))
+						.getMaxExecTime());
+
+				tmpListMachines.get(tmpListMachines.indexOf(m2))
+						.setMaxExecTime(
+								tmpListMachines.get(
+										tmpListMachines.indexOf(m2))
+										.getMaxExecTime()
+										+ test1.getTimeLength());
+				
+				test2.setStartExec(tmpListMachines.get(
+						tmpListMachines.indexOf(m1))
+						.getMaxExecTime());
+
+				tmpListMachines.get(tmpListMachines.indexOf(m1))
+						.setMaxExecTime(
+								tmpListMachines.get(
+										tmpListMachines.indexOf(m1))
+										.getMaxExecTime()
+										+ test2.getTimeLength());
 
 				if (test2.canAssignToMachine(test1.getExecMachine())
 						&& test1.canAssignToMachine(test2.getExecMachine()) && commonResources.isEmpty()) {
-
-					Machine m1 = test1.getExecMachine();
-					test1.setExecMachine(test2.getExecMachine());
-					test2.setExecMachine(m1);
 					
 					neighbour.setExecTime(calculateMaxExecTime(neighbour.getUsedMachines()));
 				} else {
-					// regardless of solution feasability, swap the tests
-					Machine m1 = test1.getExecMachine();
-					test1.setExecMachine(test2.getExecMachine());
-					test2.setExecMachine(m1);
 					
-					// solution is not feasible, so we set the execution time to infinity
 					neighbour.setExecTime(Integer.MAX_VALUE);
 				}	
 			}
