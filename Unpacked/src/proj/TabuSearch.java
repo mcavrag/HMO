@@ -53,9 +53,11 @@ public class TabuSearch {
 		 
 		 // The best neighbour is the one with the lowest execution time (eval function value)
 		 for(Solution s : candidateNeighbors) {
-		 if(neighbour.getExecTime() > s.getExecTime()) neighbour = s; }
-		 
-		 return neighbour;
+			 if(neighbour.getExecTime() > s.getExecTime())
+				 neighbour = s;
+		}
+		
+		return neighbour;
 }
 
 	// 2-OPT swap
