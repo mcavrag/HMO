@@ -88,7 +88,11 @@ public class TabuSearch {
 				Test test2 = tests.get(randTest2);
 
 				ArrayList<Resource> commonResources = test2.getReqResources();
-				commonResources.retainAll(test1.getReqResources());
+				if(commonResources == null) {
+					commonResources = new ArrayList<>();
+				}
+				if(test1.getReqResources() != null)
+					commonResources.retainAll(test1.getReqResources());
 
 				Machine m1 = test1.getExecMachine();
 				Machine m2 = test2.getExecMachine();
@@ -130,6 +134,7 @@ public class TabuSearch {
 			}
 
 			neighbours.add(neighbour);
+			i++;
 		}
 		return neighbours;
 	}
