@@ -56,7 +56,7 @@ public class TabuSearch {
 		 if(neighbour.getExecTime() > s.getExecTime()) neighbour = s; }
 		 
 		 return neighbour;
-	}
+}
 
 	// 2-OPT swap
 	// TODO
