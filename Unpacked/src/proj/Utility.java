@@ -11,8 +11,7 @@ import java.util.Collections;
 public class Utility {
 
 	public boolean parseInput(String inputFileName, ArrayList<Test> tests,
-			ArrayList<Machine> machines, ArrayList<Resource> resources,
-			int numberOfTests, int numberOfMachines, int numberOfResources) {
+			ArrayList<Machine> machines, ArrayList<Resource> resources) {
 		File testSequenceFile = new File(inputFileName);
 		String parseLine[] = null;
 		BufferedReader reader = null;
@@ -28,21 +27,17 @@ public class Utility {
 			if ((text = reader.readLine()) != null) {
 				if (!text.contains("Number of tests"))
 					return false;
-				parseLine = text.split(":");
-				numberOfTests = Integer.parseInt(parseLine[1].trim());
 			}
+			
 			if ((text = reader.readLine()) != null) {
 				if (!text.contains("Number of machines"))
 					return false;
-				parseLine = text.split(":");
-				numberOfMachines = Integer.parseInt(parseLine[1].trim());
 			}
 			if ((text = reader.readLine()) != null) {
 				if (!text.contains("Number of resources"))
 					return false;
-				parseLine = text.split(":");
-				numberOfResources = Integer.parseInt(parseLine[1].trim());
 			}
+			
 			if ((text = reader.readLine()) != null) {
 				if (!("".equals(text.trim())))
 					return false;
