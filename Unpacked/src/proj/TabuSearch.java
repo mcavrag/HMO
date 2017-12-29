@@ -66,6 +66,7 @@ public class TabuSearch {
 		ArrayList<Solution> neighbours = new ArrayList<Solution>();
 
 		ArrayList<Test> tests = currentSolution.getTestExecList();
+		
 		ArrayList<Machine> tmpListMachines = new ArrayList<Machine>();
 		tmpListMachines.addAll(currentSolution.getUsedMachines());
 
@@ -351,7 +352,7 @@ public class TabuSearch {
 		System.out.println();
 		System.out.println(startSolution.getExecTime());
 
-		return new Solution();
+		return startSolution;
 	}
 
 	private int calculateMaxExecTime(ArrayList<Machine> usedMachines) {

@@ -3,10 +3,6 @@ package proj;
 import java.util.ArrayList;
 
 public class Main {
-
-	public static int numberOfTests = 0;
-	public static int numberOfMachines = 0;
-	public static int numberOfResources = 0;
 	
 	public static ArrayList<Test> tests = new ArrayList<Test>();
 	public static ArrayList<Machine> machines = new ArrayList<Machine>();
@@ -19,9 +15,8 @@ public class Main {
 			return;
 		}
 		Utility helper = new Utility();
-		helper.parseInput(args[0], tests, machines, resources, numberOfTests, numberOfMachines, numberOfResources);
-		
-		TabuSearch tabuSearch = new TabuSearch(5, numberOfTests, 3);
+		helper.parseInput(args[0], tests, machines, resources);
+		TabuSearch tabuSearch = new TabuSearch(5, tests.size(), 3);
 
 		Solution startSolution = tabuSearch.generateStartSolution(tests, machines, resources);
 		
