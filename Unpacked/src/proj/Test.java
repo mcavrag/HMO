@@ -78,4 +78,56 @@ public class Test {
 		this.startExec = startExec;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((execMachine == null) ? 0 : execMachine.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result
+				+ ((reqResources == null) ? 0 : reqResources.hashCode());
+		result = prime * result + startExec;
+		result = prime * result + timeLength;
+		result = prime * result
+				+ ((usableMachines == null) ? 0 : usableMachines.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Test other = (Test) obj;
+		if (execMachine == null) {
+			if (other.execMachine != null)
+				return false;
+		} else if (!execMachine.equals(other.execMachine))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (reqResources == null) {
+			if (other.reqResources != null)
+				return false;
+		} else if (!reqResources.equals(other.reqResources))
+			return false;
+		if (startExec != other.startExec)
+			return false;
+		if (timeLength != other.timeLength)
+			return false;
+		if (usableMachines == null) {
+			if (other.usableMachines != null)
+				return false;
+		} else if (!usableMachines.equals(other.usableMachines))
+			return false;
+		return true;
+	}
+
 }

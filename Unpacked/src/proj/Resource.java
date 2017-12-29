@@ -4,23 +4,27 @@ public class Resource {
 	private String name;
 	private int quantity;
 	private boolean isUsed;
+	private Test usedBy;
 
 	public Resource() {
 		this.name = null;
 		this.quantity = 0;
 		this.isUsed = false;
+		this.usedBy = null;
 	}
 	
 	public Resource(String name, int quantity) {
 		this.name = name;
 		this.quantity = quantity;
 		this.isUsed = false;
+		this.usedBy = null;
 	}
 	
 	public Resource(String name) {
 		this.name = name;
 		this.quantity = 1;
 		this.isUsed = false;
+		this.usedBy = null;
 	}
 
 	public String getName() {
@@ -45,6 +49,14 @@ public class Resource {
 
 	public void setUsed(boolean isUsed) {
 		this.isUsed = isUsed;
+	}
+
+	public Test getUsedBy() {
+		return usedBy;
+	}
+
+	public void setUsedBy(Test usedBy) {
+		this.usedBy = usedBy;
 	}
 
 	@Override

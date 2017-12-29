@@ -33,7 +33,8 @@ public class TabuSearch {
 
 			// TODO
 
-			Solution bestNeighbourFound = findBestNeighbor(candidateNeighbours, solutionsInTabu);
+			Solution bestNeighbourFound = findBestNeighbor(candidateNeighbours,
+					solutionsInTabu);
 			if (bestNeighbourFound.getExecTime() < bestSolution.getExecTime()) {
 				bestSolution = bestNeighbourFound;
 			}
@@ -47,15 +48,16 @@ public class TabuSearch {
 
 	private Solution findBestNeighbor(ArrayList<Solution> candidateNeighbors,
 			ArrayList<Solution> solutionsInTabu) {
-		Solution neighbour = candidateNeighbors.get(0);
 		
-		// The best neighbour is the one with the lowest execution time (eval function value)
-		for(Solution s : candidateNeighbors) {
-			if(neighbour.getExecTime() > s.getExecTime())
-				neighbour = s;
-		}
-		
-		return neighbour;
+		 Solution neighbour = candidateNeighbors.get(0);
+		 
+		 // The best neighbour is the one with the lowest execution time (eval
+		 function value) for(Solution s : candidateNeighbors) {
+		 if(neighbour.getExecTime() > s.getExecTime()) neighbour = s; }
+		 
+		 return neighbour;
+		 
+		return null;
 	}
 
 	// 2-OPT swap
@@ -74,7 +76,7 @@ public class TabuSearch {
 			Solution neighbour = new Solution();
 			neighbour.setTestExecList(tests);
 			neighbour.setUsedMachines(tmpListMachines);
-			
+
 			int randTest1 = ThreadLocalRandom.current()
 					.nextInt(0, tests.size());
 			int randTest2 = ThreadLocalRandom.current()
@@ -83,49 +85,49 @@ public class TabuSearch {
 			if (randTest1 != randTest2) {
 				Test test1 = tests.get(randTest1);
 				Test test2 = tests.get(randTest2);
-				
+
 				ArrayList<Resource> commonResources = test2.getReqResources();
 				commonResources.retainAll(test1.getReqResources());
-				
+
 				Machine m1 = test1.getExecMachine();
 				Machine m2 = test2.getExecMachine();
-				
-				//regardless of solution feasibility, tests are swapped
+
+				// regardless of solution feasibility, tests are swapped
 				test1.setExecMachine(m2);
 				test2.setExecMachine(m1);
-				
+
 				test1.setStartExec(tmpListMachines.get(
-						tmpListMachines.indexOf(m2))
-						.getMaxExecTime());
+						tmpListMachines.indexOf(m2)).getMaxExecTime());
 
 				tmpListMachines.get(tmpListMachines.indexOf(m2))
 						.setMaxExecTime(
-								tmpListMachines.get(
-										tmpListMachines.indexOf(m2))
+								tmpListMachines
+										.get(tmpListMachines.indexOf(m2))
 										.getMaxExecTime()
 										+ test1.getTimeLength());
-				
+
 				test2.setStartExec(tmpListMachines.get(
-						tmpListMachines.indexOf(m1))
-						.getMaxExecTime());
+						tmpListMachines.indexOf(m1)).getMaxExecTime());
 
 				tmpListMachines.get(tmpListMachines.indexOf(m1))
 						.setMaxExecTime(
-								tmpListMachines.get(
-										tmpListMachines.indexOf(m1))
+								tmpListMachines
+										.get(tmpListMachines.indexOf(m1))
 										.getMaxExecTime()
 										+ test2.getTimeLength());
 
 				if (test2.canAssignToMachine(test1.getExecMachine())
-						&& test1.canAssignToMachine(test2.getExecMachine()) && commonResources.isEmpty()) {
-					
-					neighbour.setExecTime(calculateMaxExecTime(neighbour.getUsedMachines()));
+						&& test1.canAssignToMachine(test2.getExecMachine())
+						&& commonResources.isEmpty()) {
+
+					neighbour.setExecTime(calculateMaxExecTime(neighbour
+							.getUsedMachines()));
 				} else {
-					
+
 					neighbour.setExecTime(Integer.MAX_VALUE);
-				}	
+				}
 			}
-			
+
 			neighbours.add(neighbour);
 		}
 		return neighbours;
@@ -154,14 +156,21 @@ public class TabuSearch {
 				.randomNumberGenerator(tmpTestList.size());
 
 		// Random assign tests on machines
+		int count = 0;
 
 		while (startSolution.getTestExecList().size() != tests.size()) {
 
 			for (int i = 0; i < randomTestNumList.size(); i++) {
 				Test tmpTest = tmpTestList.get(randomTestNumList.get(i));
+				System.out.println("Started assigning test "
+						+ tmpTest.getName() + " with start exec time "
+						+ tmpTest.getStartExec());
 
 				if ((tmpTest.getExecMachine() == null)
 						&& !machineTmpList.isEmpty()) {
+
+					System.out.println("The test " + tmpTest.getName()
+							+ " hasn't been executed yet");
 
 					int randomMachineNum = ThreadLocalRandom.current().nextInt(
 							0, tmpTest.getUsableMachines().size());
@@ -170,11 +179,17 @@ public class TabuSearch {
 							randomMachineNum);
 
 					if (machineTmpList.contains(randomMachine)) {
+						System.out.println("Assigned test " + tmpTest.getName()
+								+ " to machine " + randomMachine.getName());
+
 						tmpTest.setExecMachine(randomMachine);
 						execMachines.get(execMachines.indexOf(randomMachine))
 								.setUsed(true);
 						machineTmpList.remove(randomMachine);
 					} else {
+						System.out.println("Couldn't assign test "
+								+ tmpTest.getName() + " to machine "
+								+ randomMachine.getName());
 						continue;
 					}
 
@@ -182,8 +197,22 @@ public class TabuSearch {
 
 					if (tmpTest.getReqResources() != null) {
 						for (Resource resource : tmpTest.getReqResources()) {
-							if (resource.isUsed()) {
+							if (execResources.get(
+									execResources.indexOf(resource)).isUsed()) {
 								tmpTest.setExecMachine(null);
+								System.out
+										.print("Couldn't assign resources to test "
+												+ tmpTest.getName()
+												+ " old start exec time was "
+												+ tmpTest.getStartExec());
+
+								tmpTest.setStartExec(execResources
+										.get(execResources.indexOf(resource))
+										.getUsedBy().getTimeLength()
+										+ tmpTest.getStartExec());
+
+								System.out.println(" and new is "
+										+ tmpTest.getStartExec());
 								machineTmpList.add(randomMachine);
 								execMachines.get(
 										execMachines.indexOf(randomMachine))
@@ -194,41 +223,134 @@ public class TabuSearch {
 
 							execResources.get(execResources.indexOf(resource))
 									.setUsed(true);
+							execResources.get(execResources.indexOf(resource))
+									.setUsedBy(tmpTest);
+
+							System.out
+									.println("Setting resource "
+											+ execResources.get(
+													execResources
+															.indexOf(resource))
+													.getName()
+											+ " used by test "
+											+ execResources
+													.get(execResources
+															.indexOf(resource))
+													.getUsedBy().getName()
+											+ " to true");
 						}
-						if (shouldContinue)
+						if (shouldContinue) {
+							for (Resource resource : execResources) {
+								if (resource.getUsedBy() != null
+										&& resource.getUsedBy().equals(tmpTest)) {
+									System.out.println("Setting resource "
+											+ resource.getName()
+											+ " used by test "
+											+ tmpTest.getName() + " to false");
+									resource.setUsed(false);
+									resource.setUsedBy(null);
+								}
+							}
 							continue;
+						}
+
 					}
 
 					tmpTestList.remove(tmpTest);
 					randomTestNumList = helper
 							.randomNumberGenerator(tmpTestList.size());
 
+					System.out.print("Old start exec time for test "
+							+ tmpTest.getName() + " was "
+							+ tmpTest.getStartExec());
+
 					tmpTest.setStartExec(execMachines.get(
 							execMachines.indexOf(randomMachine))
-							.getMaxExecTime());
+							.getMaxExecTime() > tmpTest.getStartExec() ? execMachines
+							.get(execMachines.indexOf(randomMachine))
+							.getMaxExecTime() : tmpTest.getStartExec());
+
+					System.out.println(" and new is " + tmpTest.getStartExec());
+
+					System.out.print("Old max exec time for machine "
+							+ execMachines.get(
+									execMachines.indexOf(randomMachine))
+									.getName()
+							+ " assigned to test "
+							+ tmpTest.getName()
+							+ " was "
+							+ execMachines.get(
+									execMachines.indexOf(randomMachine))
+									.getMaxExecTime());
 
 					execMachines.get(execMachines.indexOf(randomMachine))
 							.setMaxExecTime(
-									execMachines.get(
-											execMachines.indexOf(randomMachine))
-											.getMaxExecTime()
+									tmpTest.getStartExec()
 											+ tmpTest.getTimeLength());
+
+					System.out.println(" and new is "
+							+ execMachines.get(
+									execMachines.indexOf(randomMachine))
+									.getMaxExecTime());
 
 					startSolution.getTestExecList().add(tmpTest);
 				}
 			}
 			machineTmpList.addAll(machines);
-			execResources.forEach(res -> res.setUsed(false));
+
+			// All the tests that weren't assigned in the iteration
+			// Should have their start exec time increased to the max
+			// exec time of the machine where a test that used the resources
+			// was executed
+
+			for (Test test : tmpTestList) {
+				int maxWaitingTime = 0;
+				if (test.getReqResources() != null) {
+					for (Resource res : test.getReqResources()) {
+						if (execResources.get(execResources.indexOf(res))
+								.isUsed()) {
+							if (maxWaitingTime < execResources
+									.get(execResources.indexOf(res))
+									.getUsedBy().getExecMachine()
+									.getMaxExecTime()) {
+								maxWaitingTime = execResources
+										.get(execResources.indexOf(res))
+										.getUsedBy().getExecMachine()
+										.getMaxExecTime();
+							}
+						}
+					}
+					if (maxWaitingTime != 0) {
+						System.out.print("Old start exec time for test "
+								+ test.getName() + " after one iteration was "
+								+ test.getStartExec());
+
+						test.setStartExec(maxWaitingTime);
+
+						System.out
+								.println(" and new is " + test.getStartExec());
+					}
+				}
+			}
+
+			execResources.forEach(res -> {
+				res.setUsed(false);
+				res.setUsedBy(null);
+			});
 		}
+		System.out.println();
 		startSolution.getUsedMachines().addAll(execMachines);
 		startSolution.getUsedResources().addAll(execResources);
 
-		System.out.println(startSolution.getTestExecList().size());
-		System.out.println(startSolution.getUsedMachines().size());
-		System.out.println(startSolution.getUsedResources().size());
-		
-		startSolution.setExecTime(calculateMaxExecTime(startSolution.getUsedMachines()));
+		for (Test test : startSolution.getTestExecList()) {
+			System.out.println(test.getName() + ' ' + test.getStartExec() + ' '
+					+ test.getExecMachine().getName());
+		}
 
+		startSolution.setExecTime(calculateMaxExecTime(startSolution
+				.getUsedMachines()));
+
+		System.out.println();
 		System.out.println(startSolution.getExecTime());
 
 		return new Solution();
