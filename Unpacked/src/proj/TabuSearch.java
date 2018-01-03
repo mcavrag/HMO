@@ -1,97 +1,126 @@
 package proj;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class TabuSearch {
 
 	private TabuList tabuList;
-	private int numberOfNeighbours;
-	private int stopCriteria;
-	private int randomResourceNum;
+	private int numberOfNeighbors;
+	final long stopCriteria;
 
 	public TabuSearch(int maxTabuLength, int numberOfNeighbours,
 			int stopCriteria) {
 		tabuList = new TabuList(maxTabuLength);
-		this.numberOfNeighbours = numberOfNeighbours;
-		this.stopCriteria = stopCriteria;
+		this.numberOfNeighbors = numberOfNeighbours;
+		this.stopCriteria = System.nanoTime() + stopCriteria * 1000 * 1000 * 1000L;;
 	}
 
 	public Solution run(Solution startSolution) {
 
 		Solution bestSolution = startSolution;
 		Solution currentSolution = startSolution;
+		
+		System.out.println("Start solution execution time is: " + startSolution.getExecTime());
 
-		int criteriaCount = 0;
+		do {
 
-		while ((++criteriaCount) < stopCriteria) {
-
-			ArrayList<Solution> candidateNeighbours = generateNeighbours(currentSolution);
+			ArrayList<Solution> candidateNeighbors = generateNeighbors(currentSolution);
 			ArrayList<Solution> solutionsInTabu = new ArrayList<Solution>();
 
 			tabuList.forEach(solutionsInTabu::add);
 
-			// TODO
-
-			Solution bestNeighbourFound = findBestNeighbor(candidateNeighbours,
+			Solution bestNeighbourFound = findBestNeighbor(candidateNeighbors,
 					solutionsInTabu);
+
 			if (bestNeighbourFound.getExecTime() < bestSolution.getExecTime()) {
 				bestSolution = bestNeighbourFound;
 			}
 
-			tabuList.add(currentSolution);
-			currentSolution = bestNeighbourFound;
-		}
+			tabuList.add(bestNeighbourFound);
 
+			currentSolution = bestNeighbourFound;
+			
+		} while(System.nanoTime() < stopCriteria);
+		
+		System.out.println("Best solution execution time is: " + bestSolution.getExecTime());
+		
 		return bestSolution;
 	}
 
-	private Solution findBestNeighbor(ArrayList<Solution> candidateNeighbors,
+	private Solution findBestNeighbor(
+			ArrayList<Solution> candidateNeighbors,
 			ArrayList<Solution> solutionsInTabu) {
-		
-		 Solution neighbour = candidateNeighbors.get(0);
-		 
-		 // The best neighbour is the one with the lowest execution time (eval function value)
-		 for(Solution s : candidateNeighbors) {
-			 if(neighbour.getExecTime() > s.getExecTime())
-				 neighbour = s;
+
+		// Remove the candidate neighbors that are in the tabu list
+		if (candidateNeighbors == null) {
+			Solution tmpSolution = new Solution();
+			tmpSolution.setExecTime(Integer.MAX_VALUE);
+			return tmpSolution;
 		}
+
+		candidateNeighbors.removeIf(sol -> solutionsInTabu.contains(sol));
 		
-		return neighbour;
-}
+		// Sort the candidate neighbors by the execution time
+		Collections.sort(candidateNeighbors, new Comparator<Solution>() {
+			@Override
+			public int compare(Solution s1, Solution s2) {
+				return Integer.compare(s1.getExecTime(), s2.getExecTime());
+			}
+		});
+
+		// Get the neighbor with the lowest execution time
+		return candidateNeighbors.get(0);
+	}
 
 	// 2-OPT swap
 	// TODO
 	// this needs testing
-	private ArrayList<Solution> generateNeighbours(Solution currentSolution) {
+	private ArrayList<Solution> generateNeighbors(Solution currentSolution) {
+		ArrayList<Solution> neighbors = new ArrayList<Solution>();
 		Utility helper = new Utility();
-		ArrayList<Solution> neighbours = new ArrayList<Solution>();
 
-		ArrayList<Test> tests = currentSolution.getTestExecList();
-		
-		ArrayList<Machine> tmpListMachines = new ArrayList<Machine>();
-		tmpListMachines.addAll(currentSolution.getUsedMachines());
+		ArrayList<Integer> randomNumbers = helper
+				.randomNumberGenerator(currentSolution.getTestExecList().size());
 
 		int i = 0;
-		while (i < numberOfNeighbours) {
-			Solution neighbour = new Solution();
-			neighbour.setTestExecList(tests);
-			neighbour.setUsedMachines(tmpListMachines);
 
-			int randTest1 = ThreadLocalRandom.current()
-					.nextInt(0, tests.size());
-			int randTest2 = ThreadLocalRandom.current()
-					.nextInt(0, tests.size());
+		while (i < numberOfNeighbors) {
+
+			ArrayList<Test> tests = new ArrayList<Test>();
+			tests.addAll(currentSolution.getTestExecList());
+
+			ArrayList<Machine> tmpListMachines = new ArrayList<Machine>();
+			tmpListMachines.addAll(currentSolution.getUsedMachines());
+
+			Solution neighbor = new Solution();
+			neighbor.setTestExecList(tests);
+			neighbor.setUsedMachines(tmpListMachines);
+
+			int randTest1 = ThreadLocalRandom.current().nextInt(0,
+					randomNumbers.size());
+			int randTest2 = ThreadLocalRandom.current().nextInt(0,
+					randomNumbers.size());
 
 			if (randTest1 != randTest2) {
-				Test test1 = tests.get(randTest1);
-				Test test2 = tests.get(randTest2);
+				
+				Test test1 = neighbor.getTestExecList().get(
+						randomNumbers.get(randTest1));
+				Test test2 = neighbor.getTestExecList().get(
+						randomNumbers.get(randTest2));
 
-				ArrayList<Resource> commonResources = test2.getReqResources();
-				if(commonResources == null) {
-					commonResources = new ArrayList<>();
+				ArrayList<Resource> commonResources = new ArrayList<Resource>();
+
+				if (test2.getReqResources() != null) {
+					commonResources.addAll(test2.getReqResources());
 				}
-				if(test1.getReqResources() != null)
+
+				if (test1.getReqResources() != null)
 					commonResources.retainAll(test1.getReqResources());
 
 				Machine m1 = test1.getExecMachine();
@@ -104,39 +133,44 @@ public class TabuSearch {
 				test1.setStartExec(tmpListMachines.get(
 						tmpListMachines.indexOf(m2)).getMaxExecTime());
 
-				tmpListMachines.get(tmpListMachines.indexOf(m2))
+				neighbor.getUsedMachines()
+						.get(tmpListMachines.indexOf(m2))
 						.setMaxExecTime(
 								tmpListMachines
 										.get(tmpListMachines.indexOf(m2))
 										.getMaxExecTime()
+										- test2.getTimeLength()
 										+ test1.getTimeLength());
 
 				test2.setStartExec(tmpListMachines.get(
 						tmpListMachines.indexOf(m1)).getMaxExecTime());
 
-				tmpListMachines.get(tmpListMachines.indexOf(m1))
+				neighbor.getUsedMachines()
+						.get(tmpListMachines.indexOf(m1))
 						.setMaxExecTime(
 								tmpListMachines
 										.get(tmpListMachines.indexOf(m1))
 										.getMaxExecTime()
+										- test1.getTimeLength()
 										+ test2.getTimeLength());
 
 				if (test2.canAssignToMachine(test1.getExecMachine())
 						&& test1.canAssignToMachine(test2.getExecMachine())
 						&& commonResources.isEmpty()) {
 
-					neighbour.setExecTime(calculateMaxExecTime(neighbour
+					neighbor.setExecTime(calculateMaxExecTime(neighbor
 							.getUsedMachines()));
 				} else {
+					neighbor.setExecTime(Integer.MAX_VALUE);
+				}
 
-					neighbour.setExecTime(Integer.MAX_VALUE);
+				if(!neighbors.contains(neighbor)) {
+					neighbors.add(neighbor);
+					i++;
 				}
 			}
-
-			neighbours.add(neighbour);
-			i++;
 		}
-		return neighbours;
+		return neighbors;
 	}
 
 	public Solution generateStartSolution(ArrayList<Test> tests,
@@ -162,7 +196,6 @@ public class TabuSearch {
 				.randomNumberGenerator(tmpTestList.size());
 
 		// Random assign tests on machines
-		int count = 0;
 
 		while (startSolution.getTestExecList().size() != tests.size()) {
 
@@ -215,7 +248,10 @@ public class TabuSearch {
 								tmpTest.setStartExec(execResources
 										.get(execResources.indexOf(resource))
 										.getUsedBy().getTimeLength()
-										+ tmpTest.getStartExec());
+										+ execResources
+												.get(execResources
+														.indexOf(resource))
+												.getUsedBy().getStartExec());
 
 								System.out.println(" and new is "
 										+ tmpTest.getStartExec());
@@ -358,6 +394,7 @@ public class TabuSearch {
 
 		System.out.println();
 		System.out.println(startSolution.getExecTime());
+		System.out.println();
 
 		return startSolution;
 	}

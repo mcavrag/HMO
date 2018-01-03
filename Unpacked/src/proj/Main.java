@@ -16,7 +16,7 @@ public class Main {
 		}
 		Utility helper = new Utility();
 		helper.parseInput(args[0], tests, machines, resources);
-		TabuSearch tabuSearch = new TabuSearch(5, tests.size(), 3);
+		TabuSearch tabuSearch = new TabuSearch(50, 50, 2);
 
 		Solution startSolution = tabuSearch.generateStartSolution(tests, machines, resources);
 		
