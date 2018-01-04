@@ -57,13 +57,6 @@ public class TabuSearch {
 			ArrayList<Solution> candidateNeighbors,
 			ArrayList<Solution> solutionsInTabu) {
 
-		// Remove the candidate neighbors that are in the tabu list
-		if (candidateNeighbors == null) {
-			Solution tmpSolution = new Solution();
-			tmpSolution.setExecTime(Integer.MAX_VALUE);
-			return tmpSolution;
-		}
-
 		candidateNeighbors.removeIf(sol -> solutionsInTabu.contains(sol));
 		
 		// Sort the candidate neighbors by the execution time
@@ -391,6 +384,13 @@ public class TabuSearch {
 
 		startSolution.setExecTime(calculateMaxExecTime(startSolution
 				.getUsedMachines()));
+		
+		startSolution.getUsedMachines().forEach(m -> m.setUsed(false));
+		
+		startSolution.getUsedResources().forEach(r -> {
+			r.setUsed(false);
+			r.setUsedBy(null);
+		});
 
 		System.out.println();
 		System.out.println(startSolution.getExecTime());
