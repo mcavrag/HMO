@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -148,4 +149,16 @@ public class Utility {
 	    return list;
 	}
 
+	public void copyTestLists(ArrayList<Test> tests, ArrayList<Test> testExecList) {
+		
+		for (Test test : testExecList) {
+			tests.add((Test) test.clone());
+		}
+	}
+	public void copyMachineLists(ArrayList<Machine> machines, ArrayList<Machine> usedMachinesList) {
+		
+		for (Machine machine : usedMachinesList) {
+			machines.add((Machine) machine.clone());
+		}
+	}
 }

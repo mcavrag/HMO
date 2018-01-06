@@ -2,7 +2,7 @@ package proj;
 
 import java.util.ArrayList;
 
-public class Test {
+public class Test implements Cloneable{
 
 	private String name;
 	private int timeLength;
@@ -22,6 +22,22 @@ public class Test {
 		this.reqResources = reqResources;
 	}
 
+	public Test(Test test) {
+		this.name = test.name;
+		this.timeLength = test.timeLength;
+		this.usableMachines = test.usableMachines;
+		this.reqResources = test.reqResources;
+	}
+
+	@Override
+	protected Object clone() {
+		try {
+			return super.clone();
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -100,7 +116,7 @@ public class Test {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof Test))
 			return false;
 		Test other = (Test) obj;
 		if (execMachine == null) {

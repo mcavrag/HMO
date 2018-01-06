@@ -1,6 +1,6 @@
 package proj;
 
-public class Machine {
+public class Machine implements Cloneable {
 
 	private String name;
 	private int maxExecTime;
@@ -16,6 +16,15 @@ public class Machine {
 		this.name = name;
 		maxExecTime = 0;
 		setUsed(false);
+	}
+	
+	@Override
+	protected Object clone() {
+		try {
+			return super.clone();
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
 	}
 
 	public String getName() {
@@ -59,10 +68,10 @@ public class Machine {
 		if (getClass() != obj.getClass())
 			return false;
 		Machine other = (Machine) obj;
-		if (name == null) {
-			if (other.name != null)
+		if (this.name == null) {
+			if (other.getName() != null)
 				return false;
-		} else if (!name.equals(other.name))
+		} else if (!this.name.equals(other.getName()))
 			return false;
 		return true;
 	}

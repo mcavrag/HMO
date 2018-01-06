@@ -6,14 +6,12 @@ public class Solution {
 
 	private ArrayList<Test> testExecList;
 	private ArrayList<Machine> usedMachines;
-	private ArrayList<Resource> usedResources;
 	private int execTime;
 
 	public Solution() {
 		testExecList = new ArrayList<Test>();
 		execTime = 0;
 		usedMachines = new ArrayList<Machine>();
-		usedResources = new ArrayList<Resource>();
 	}
 
 	public ArrayList<Test> getTestExecList() {
@@ -40,17 +38,6 @@ public class Solution {
 		return this.usedMachines;
 	}
 	
-	public void addResource(Resource r) {
-		this.usedResources.add(r);
-	}
-	
-	public ArrayList<Resource> getUsedResources() {
-		return this.usedResources;
-	}
-	
-	public void setUsedResources(ArrayList<Resource> resources) {
-		this.usedResources = resources;
-	}
 
 	@Override
 	public int hashCode() {
@@ -61,8 +48,6 @@ public class Solution {
 				+ ((testExecList == null) ? 0 : testExecList.hashCode());
 		result = prime * result
 				+ ((usedMachines == null) ? 0 : usedMachines.hashCode());
-		result = prime * result
-				+ ((usedResources == null) ? 0 : usedResources.hashCode());
 		return result;
 	}
 
@@ -72,7 +57,7 @@ public class Solution {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof Solution))
 			return false;
 		Solution other = (Solution) obj;
 		if (execTime != other.execTime)
@@ -86,11 +71,6 @@ public class Solution {
 			if (other.usedMachines != null)
 				return false;
 		} else if (!usedMachines.equals(other.usedMachines))
-			return false;
-		if (usedResources == null) {
-			if (other.usedResources != null)
-				return false;
-		} else if (!usedResources.equals(other.usedResources))
 			return false;
 		return true;
 	}
