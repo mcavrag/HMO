@@ -1,13 +1,15 @@
 package proj;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 public class Utility {
 
@@ -159,6 +161,32 @@ public class Utility {
 		
 		for (Machine machine : usedMachinesList) {
 			machines.add((Machine) machine.clone());
+		}
+	}
+	
+	public void printOutSolution(Solution solution) {
+		File outputFile = new File("out.txt");
+		BufferedWriter out;
+		try {
+			out = new BufferedWriter(new FileWriter(outputFile));
+			ArrayList<Test> testList = solution.getTestExecList();
+			
+			Collections.sort(testList, new Comparator<Test>() {
+				@Override
+				public int compare(Test s1, Test s2) {
+					return Integer.compare(s1.getStartExec(), s2.getStartExec());
+				}
+			});
+			
+			for (Test t : testList) {
+				out.write("'" + t.getName() + "'," + t.getStartExec() + ",'" + t.getExecMachine().getName() + "'\n");
+			}
+			
+			out.flush();
+			out.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }
