@@ -165,7 +165,7 @@ public class Utility {
 	}
 	
 	public void printOutSolution(Solution solution) {
-		File outputFile = new File("out.txt");
+		File outputFile = new File("C:/Users/matij/Documents/HMO/out.txt");
 		BufferedWriter out;
 		try {
 			out = new BufferedWriter(new FileWriter(outputFile));

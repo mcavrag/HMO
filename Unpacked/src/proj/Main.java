@@ -21,8 +21,8 @@ public class Main {
 		Solution startSolution = tabuSearch.generateStartSolution(tests, machines, resources);
 		
 		helper.printOutSolution(startSolution);
-		
-		tabuSearch.run(startSolution);
+			
+		//tabuSearch.run(startSolution);
 
 		/*for (Test test : tests) {
 			System.out.print(test.getName() + " " + test.getTimeLength() + " ");
