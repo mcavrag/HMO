@@ -79,11 +79,17 @@ public class Test implements Cloneable{
 	}
 
 	public boolean canAssignToMachine(Machine machine) {
-		return usableMachines.contains(machine);
+		for (Machine m : usableMachines) {
+			if(m.getName().equals(machine.getName())) return true;
+		}
+		return false;
 	}
 
 	public boolean canAssignResource(Resource resource) {
-		return reqResources.contains(resource);
+		for (Resource r : reqResources) {
+			if(r.getName().equals(resource.getName())) return true;
+		}
+		return false;
 	}
 
 	public int getStartExec() {

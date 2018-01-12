@@ -16,13 +16,15 @@ public class Main {
 		}
 		Utility helper = new Utility();
 		helper.parseInput(args[0], tests, machines, resources);
-		TabuSearch tabuSearch = new TabuSearch(1, 3, 60);
+		TabuSearch tabuSearch = new TabuSearch(tests.size(), tests.size()*2, 60);
 
 		Solution startSolution = tabuSearch.generateStartSolution(tests, machines, resources);
 		
-		helper.printOutSolution(startSolution);
+		//helper.printOutSolution(startSolution);
 			
-		//tabuSearch.run(startSolution);
+		tabuSearch.run(startSolution);
+		
+		System.out.println(startSolution.getExecTime());
 
 		/*for (Test test : tests) {
 			System.out.print(test.getName() + " " + test.getTimeLength() + " ");

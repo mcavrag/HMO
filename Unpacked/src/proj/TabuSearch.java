@@ -22,7 +22,7 @@ public class TabuSearch {
 		// this.stopCriteria = System.nanoTime() + stopCriteria * 1000 * 1000 *
 		// 1000L;
 
-		this.stopCriteria = (long) (System.nanoTime() + 0.01 * 1000 * 1000 * 1000L);
+		this.stopCriteria = (long) (System.nanoTime() + 60 * 1000 * 1000 * 1000L);
 	}
 
 	public Solution run(Solution startSolution) {
@@ -51,16 +51,24 @@ public class TabuSearch {
 
 			currentSolution = bestNeighbourFound;
 
-			if (bestNeighbourFound.getExecTime() == Integer.MAX_VALUE)
+			if (bestNeighbourFound.getExecTime() == Integer.MAX_VALUE) {
 				currentSolution = startSolution;
+			}
 
 		} while (System.nanoTime() < stopCriteria);
 
 		System.out.println("Best solution execution time is: "
 				+ bestSolution.getExecTime());
+		
 
 		Utility helper = new Utility();
 		helper.printOutSolution(bestSolution);
+		//printOut(bestSolution);
+		
+		for (Test test : bestSolution.getTestExecList()) {
+			System.out.println(test.getName() + ' ' + test.getStartExec() + ' '
+					+ test.getExecMachine().getName());
+		}
 
 		return bestSolution;
 	}
@@ -150,10 +158,9 @@ public class TabuSearch {
 				calculateMachineExecTime(neighbor.getTestExecList(),
 						neighbor.getUsedMachines());
 
-				if (test2.canAssignToMachine(test1.getExecMachine())
-						&& test1.canAssignToMachine(test2.getExecMachine())
-						&& !checkIfResourceCollision(neighbor, test1)
-						&& !checkIfResourceCollision(neighbor, test2)) {
+				if (test2.canAssignToMachine(m1)
+						&& test1.canAssignToMachine(m2)
+						&& !checkIfResourceCollision(neighbor)) {
 
 					neighbor.setExecTime(calculateMaxExecTime(neighbor
 							.getUsedMachines()));
@@ -162,14 +169,14 @@ public class TabuSearch {
 				}
 
 				if (!checkIfContains(neighbors, neighbor)) {
-					System.out.println("Test that were changed were: "
-							+ test1.getName() + " and " + test2.getName());
+					/*System.out.println("Test that were changed were: "
+							+ test1.getName() + " and " + test2.getName());*/
 
-					printOut(neighbor);
+					//printOut(neighbor);
 					neighbors.add(neighbor);
 					i++;
 				} else {
-					System.out.println("WTF");
+					//System.out.println("WTF");
 				}
 			}
 		}
@@ -196,15 +203,17 @@ public class TabuSearch {
 		}
 	}
 
-	private boolean checkIfResourceCollision(Solution neighbor, Test swappedTest) {
-		for (Test test : neighbor.getTestExecList()) {
-			if (!test.getName().equals(swappedTest.getName())
-					&& (test.getReqResources() != null)
-					&& (swappedTest.getReqResources() != null)
-					&& checkTimeDiff(test, swappedTest)) {
-				for (Resource res : swappedTest.getReqResources()) {
-					if (test.getReqResources().contains(res)) {
-						return true;
+	private boolean checkIfResourceCollision(Solution neighbor) {
+		for (Test test1 : neighbor.getTestExecList()) {
+			for(Test test2 : neighbor.getTestExecList()) {
+				if (!test1.getName().equals(test2.getName())
+						&& (test1.getReqResources() != null)
+						&& (test2.getReqResources() != null)
+						&& checkTimeDiff(test1, test2)) {
+					for (Resource res1 : test2.getReqResources()) {
+						for(Resource res2 : test1.getReqResources()) {
+							if(res2.getName().equals(res1.getName())) return true;
+						}
 					}
 				}
 			}
@@ -225,6 +234,7 @@ public class TabuSearch {
 			return true;
 		} else if ((swappedTest.getStartExec() > test.getStartExec())
 				&& (swappedTest.getStartExec() < testEnd)) {
+			//System.out.println("soaijdioasjdiasoj");
 			return true;
 		}
 
@@ -246,28 +256,43 @@ public class TabuSearch {
 		int timeDiff = 0;
 		int swappedTestEnd = swappedTest.getStartExec()
 				+ swappedTest.getTimeLength();
+		
+		ArrayList<Test> sortedTestList = new ArrayList<Test>();
+		
+		Utility helper = new Utility();
+				
+		Collections.sort(testList, new Comparator<Test>() {
+			@Override
+			public int compare(Test t1, Test t2) {
+				return Integer.compare(t1.getStartExec(), t2.getStartExec());
+			}
+		});
 
 		for (Test test : testList) {
 			if (test.getExecMachine().equals(machine)
 					&& (!test.getName().equals(swappedTest.getName()))) {
-				if (checkTimeDiff(test, swappedTest)) {
-					timeDiff = Math.abs(swappedTestEnd - test.getStartExec());
-					System.out.println(test.getStartExec() + " "
-							+ swappedTest.getStartExec());
+				int testEnd = test.getStartExec() + test.getTimeLength();
+
+				if ((swappedTestEnd > test.getStartExec())
+								&& (swappedTestEnd < testEnd)) {
+					timeDiff = swappedTestEnd - test.getStartExec();
+					//System.out.println(timeDiff);
+					//System.out.println(test.getStartExec() + " "
+					//		+ swappedTest.getStartExec());
 					test.setStartExec(test.getStartExec() + timeDiff);
-					System.out.println("usao + " + test.getName() + " - "
-							+ swappedTest.getName());
+					//System.out.println("usao + " + test.getName() + " - "
+					//		+ swappedTest.getName());
 					swappedTest = test;
 					swappedTestEnd = swappedTest.getStartExec()
 							+ swappedTest.getTimeLength();
 				} else if (test.getStartExec() > swappedTestEnd
 						&& (test.getReqResources() == null)) {
 					timeDiff = test.getStartExec() - swappedTestEnd;
-					System.out.println(test.getStartExec() + " "
-							+ swappedTest.getStartExec());
+					//System.out.println(test.getStartExec() + " "
+					//		+ swappedTest.getStartExec());
 					test.setStartExec(test.getStartExec() - timeDiff);
-					System.out.println("usao - " + test.getName() + " - "
-							+ swappedTest.getName());
+					//System.out.println("usao - " + test.getName() + " - "
+					//		+ swappedTest.getName());
 					swappedTest = test;
 					swappedTestEnd = swappedTest.getStartExec()
 							+ swappedTest.getTimeLength();
