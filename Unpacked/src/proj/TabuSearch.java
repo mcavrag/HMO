@@ -28,7 +28,7 @@ public class TabuSearch {
 		// this.stopCriteria = System.nanoTime() + stopCriteria * 1000 * 1000 *
 		// 1000L;
 
-		this.stopCriteria = (long) (System.nanoTime() + 60 * 1000 * 1000 * 1000L);
+		this.stopCriteria = (long) (System.nanoTime() + 60 * 1 * 1000 * 1000 * 1000L);
 	}
 
 	public Solution run(Solution startSolution) {
@@ -58,6 +58,7 @@ public class TabuSearch {
 			currentSolution = bestNeighbourFound;
 
 			if (bestNeighbourFound.getExecTime() == Integer.MAX_VALUE) {
+				//System.out.println("Usel");
 				currentSolution = startSolution;
 			}
 
@@ -113,8 +114,6 @@ public class TabuSearch {
 		ArrayList<Solution> neighbors = new ArrayList<Solution>();
 		Utility helper = new Utility();
 
-		ArrayList<Integer> randomNumbers = helper
-				.randomNumberGenerator(currentSolution.getTestExecList().size());
 		int i = 0;
 
 		while (i < numberOfNeighbors) {
@@ -135,7 +134,10 @@ public class TabuSearch {
 			neighbor.setTestExecList(tests);
 			neighbor.setUsedMachines(tmpListMachines);
 
-			while (count < 1) {
+			while (count < tests.size()/10) {
+				
+				ArrayList<Integer> randomNumbers = helper
+						.randomNumberGenerator(currentSolution.getTestExecList().size());
 
 				int randTest1 = ThreadLocalRandom.current().nextInt(0,
 						randomNumbers.size());
@@ -153,6 +155,9 @@ public class TabuSearch {
 					Machine m2 = test2.getExecMachine();
 
 					if (m1.getName().equals(m2.getName()))
+						continue;
+					else if(test2.canAssignToMachine(m1)
+							&& test1.canAssignToMachine(m2))
 						continue;
 
 					// System.out.println(m1.getName() + " " + m2.getName());
@@ -217,9 +222,7 @@ public class TabuSearch {
 					calculateMachineExecTime(neighbor.getTestExecList(),
 							neighbor.getUsedMachines());
 
-					if (test2.canAssignToMachine(m1)
-							&& test1.canAssignToMachine(m2)
-							&& !checkIfResourceCollision(neighbor)) {
+					if (!checkIfResourceCollision(neighbor)) {
 
 						neighbor.setExecTime(calculateMaxExecTime(neighbor
 								.getUsedMachines()));
@@ -460,22 +463,43 @@ public class TabuSearch {
 
 				}
 
-				if (test.getStartExec() > swappedTestEnd
-						&& (test.getReqResources() == null) && (operation == 2)) {
+				if (test.getStartExec() > swappedTestEnd && (operation == 2)) {
 					timeDiff = test.getStartExec() - swappedTestEnd;
-					// System.out.println(test.getStartExec() + " "
-					// + swappedTest.getStartExec());
+					
+					if(timeDiff < 0) {
+						System.out.println("wat");
+					}
+					if (debug)
+						System.out.println("stara vremena za " + test.getName()
+								+ " " + test.getStartExec() + " --- "
+								+ swappedTest.getName() + " "
+								+ swappedTest.getTimeLength());
 					test.setStartExec(test.getStartExec() - timeDiff);
-					// System.out.println("usao - " + test.getName() + " - "
-					// + swappedTest.getName());
-					swappedTest = test;
+					if (debug)
+						System.out.println("usao + " + test.getName() + " - "
+								+ swappedTest.getName());
+					swappedTest.setTimeLength(swappedTest.getTimeLength()
+							+ test.getTimeLength());
 					swappedTestEnd = swappedTest.getStartExec()
 							+ swappedTest.getTimeLength();
+					if (debug)
+						System.out.println("nova vremena za " + test.getName()
+								+ " " + test.getStartExec() + " --- "
+								+ swappedTest.getName() + " "
+								+ swappedTest.getTimeLength());
+				} else if (debug) {
+					System.out.println("usao + " + test.getName() + " - "
+							+ swappedTest.getName());
+					System.out.println(test.getStartExec() + "->"
+							+ test.getStartExec() + test.getTimeLength()
+							+ " ---- " + swappedTest.getStartExec() + "->"
+							+ swappedTest.getStartExec()
+							+ swappedTest.getTimeLength());
 				}
 			}
 		}
 
-		if (swappedTest.getTimeLength() != originalSwappedLen && operation == 1) {
+		if (swappedTest.getTimeLength() != originalSwappedLen && operation != 0) {
 			swappedTest.setTimeLength(originalSwappedLen);
 		}
 	}
@@ -705,8 +729,17 @@ public class TabuSearch {
 
 		System.out.println();
 		startSolution.setUsedMachines(execMachines);
+		
+		ArrayList<Test> tmpList = startSolution.getTestExecList();
+		
+		Collections.sort(tmpList, new Comparator<Test>() {
+			@Override
+			public int compare(Test s1, Test s2) {
+				return Integer.compare(s1.getStartExec(), s2.getStartExec());
+			}
+		});
 
-		for (Test test : startSolution.getTestExecList()) {
+		for (Test test : tmpList) {
 			System.out.println("'" + test.getName() + "',"
 					+ test.getStartExec() + ",'"
 					+ test.getExecMachine().getName() + "'");
