@@ -137,11 +137,6 @@ public class Utility {
 		return true;
 	}
 	
-	public boolean writeToFile(String fileName)
-	{
-		return true;
-	}
-	
 	public ArrayList<Integer> randomNumberGenerator(int numbers) {
 		ArrayList<Integer> list = new ArrayList<Integer>();
         for (int i=0; i < numbers; i++) {

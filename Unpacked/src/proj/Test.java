@@ -27,6 +27,7 @@ public class Test implements Cloneable{
 		this.timeLength = test.timeLength;
 		this.usableMachines = test.usableMachines;
 		this.reqResources = test.reqResources;
+		this.execMachine = test.execMachine;
 	}
 
 	@Override

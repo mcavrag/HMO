@@ -16,7 +16,7 @@ public class Main {
 		}
 		Utility helper = new Utility();
 		helper.parseInput(args[0], tests, machines, resources);
-		TabuSearch tabuSearch = new TabuSearch(tests.size(), tests.size(), 60);
+		TabuSearch tabuSearch = new TabuSearch(tests.size()/50, tests.size()/50, 60);
 
 		Solution startSolution = tabuSearch.generateStartSolution(tests, machines, resources);
 		
@@ -24,7 +24,7 @@ public class Main {
 			
 		tabuSearch.run(startSolution);
 		
-		System.out.println(startSolution.getExecTime());
+		System.out.println("Start solution exec: " + startSolution.getExecTime());
 
 		/*for (Test test : tests) {
 			System.out.print(test.getName() + " " + test.getTimeLength() + " ");
